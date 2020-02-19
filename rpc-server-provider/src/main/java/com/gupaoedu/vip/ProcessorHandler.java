@@ -22,34 +22,31 @@ public class ProcessorHandler implements Runnable {
 
     @Override
     public void run() {
-        ObjectInputStream objectInputStream = null;
-        ObjectOutputStream objectOutputStream = null;
+        ObjectInputStream ois = null;
+        ObjectOutputStream oos = null;
 
         try {
-            objectInputStream = new ObjectInputStream(socket.getInputStream());
+            ois = new ObjectInputStream(socket.getInputStream());
+            RpcRequest rpcRequest = (RpcRequest) ois.readObject();
 
-            //输入流中应该有什么东西？
-            //请求哪个类，方法名称、参数
-            RpcRequest rpcRequest = (RpcRequest) objectInputStream.readObject();
-            Object result = invoke(rpcRequest); //反射调用本地服务
+            Object result = this.invoke(rpcRequest);
 
-            objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-            objectOutputStream.writeObject(result);
-
-            objectOutputStream.flush();
+            oos = new ObjectOutputStream(socket.getOutputStream());
+            oos.writeObject(result);
+            oos.flush();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (objectInputStream != null) {
+            if (ois != null) {
                 try {
-                    objectInputStream.close();
+                    ois.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            if (objectOutputStream != null) {
+            if (oos != null) {
                 try {
-                    objectOutputStream.close();
+                    oos.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -58,34 +55,31 @@ public class ProcessorHandler implements Runnable {
     }
 
     private Object invoke(RpcRequest request) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        //反射调用
         String serviceName = request.getClassName();
         String version = request.getVersion();
-        //增加版本号的判断
+
         if (!StringUtils.isEmpty(version)) {
             serviceName += "-" + version;
         }
 
         Object service = handlerMap.get(serviceName);
         if (service == null) {
-            throw new RuntimeException("service not found:" + serviceName);
+            throw new RuntimeException("service not found : " + serviceName);
         }
 
-        Object[] args = request.getParameters(); //拿到客户端请求的参数
+        Class clazz = Class.forName(request.getClassName());
+        Object[] args = request.getParameters();
         Method method = null;
-        if (args != null) {
+        if (args == null) {
+            method = clazz.getMethod(request.getMethodName());
+        } else {
             Class<?>[] types = new Class[args.length]; //获得每个参数的类型
             for (int i = 0; i < args.length; i++) {
                 types[i] = args[i].getClass();
             }
-            Class clazz = Class.forName(request.getClassName()); //跟去请求的类进行加载
-            method = clazz.getMethod(request.getMethodName(), types); //sayHello, saveUser找到这个类中的方法
-        } else {
-            Class clazz = Class.forName(request.getClassName()); //跟去请求的类进行加载
-            method = clazz.getMethod(request.getMethodName()); //sayHello, saveUser找到这个类中的方法
+            method = clazz.getMethod(request.getMethodName(), types);
         }
 
-        Object result = method.invoke(service, args);//HelloServiceImpl 进行反射调用
-        return result;
+        return method.invoke(service, args);
     }
 }

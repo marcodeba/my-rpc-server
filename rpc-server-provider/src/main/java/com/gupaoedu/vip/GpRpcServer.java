@@ -19,9 +19,7 @@ import java.util.concurrent.Executors;
 public class GpRpcServer implements ApplicationContextAware, InitializingBean {
 
     ExecutorService executorService = Executors.newCachedThreadPool();
-
     private Map<String, Object> handlerMap = new HashMap();
-
     private int port;
 
     public GpRpcServer(int port) {
