@@ -11,7 +11,6 @@ import java.net.Socket;
 import java.util.Map;
 
 public class ProcessorHandler implements Runnable {
-
     private Socket socket;
     private Map<String, Object> handlerMap;
 
