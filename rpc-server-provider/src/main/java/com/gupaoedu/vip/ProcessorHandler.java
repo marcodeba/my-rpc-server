@@ -28,7 +28,7 @@ public class ProcessorHandler implements Runnable {
             ois = new ObjectInputStream(socket.getInputStream());
             RpcRequest rpcRequest = (RpcRequest) ois.readObject();
 
-            Object result = this.invoke(rpcRequest);
+            Object result = this.invokeMethod(rpcRequest);
 
             oos = new ObjectOutputStream(socket.getOutputStream());
             oos.writeObject(result);
@@ -53,9 +53,10 @@ public class ProcessorHandler implements Runnable {
         }
     }
 
-    private Object invoke(RpcRequest request) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    private Object invokeMethod(RpcRequest request) {
         String serviceName = request.getClassName();
         String version = request.getVersion();
+        Object[] args = request.getParameters();
 
         if (!StringUtils.isEmpty(version)) {
             serviceName += "-" + version;
@@ -66,19 +67,23 @@ public class ProcessorHandler implements Runnable {
             throw new RuntimeException("service not found : " + serviceName);
         }
 
-        Class clazz = Class.forName(request.getClassName());
-        Object[] args = request.getParameters();
-        Method method = null;
-        if (args == null) {
-            method = clazz.getMethod(request.getMethodName());
-        } else {
-            Class<?>[] types = new Class[args.length]; //获得每个参数的类型
-            for (int i = 0; i < args.length; i++) {
-                types[i] = args[i].getClass();
+        try {
+            Class clazz = Class.forName(request.getClassName());
+            Method method;
+            if (args == null) {
+                method = clazz.getMethod(request.getMethodName());
+            } else {
+                Class<?>[] types = new Class[args.length]; //获得每个参数的类型
+                for (int i = 0; i < args.length; i++) {
+                    types[i] = args[i].getClass();
+                }
+                method = clazz.getMethod(request.getMethodName(), types);
             }
-            method = clazz.getMethod(request.getMethodName(), types);
-        }
 
-        return method.invoke(service, args);
+            return method.invoke(service, args);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
