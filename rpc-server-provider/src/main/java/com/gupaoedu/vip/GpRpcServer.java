@@ -26,13 +26,12 @@ public class GpRpcServer implements ApplicationContextAware, InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(port);
-            while (true) {//不断接受请求
-                Socket socket = serverSocket.accept();//BIO
-                //每一个socket 交给一个processorHandler来处理
+            while (true) {
+                Socket socket = serverSocket.accept();
                 executorService.execute(new ProcessorHandler(socket, handlerMap));
             }
         } catch (IOException e) {
