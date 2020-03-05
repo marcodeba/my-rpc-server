@@ -7,16 +7,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE) //类/接口
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Component //被spring进行扫描？
+@Component
+
+/**
+ * public interface com.gupaoedu.vip.RpcService extends java.lang.annotation.Annotation {
+ *   public abstract java.lang.Class<?> value();
+ *   public abstract java.lang.String version();
+ * }
+ */
 public @interface RpcService {
-
-    Class<?> value(); //拿到服务的接口
-
-    /**
-     * 版本号
-     */
+    Class<?> value();
     String version() default "";
-
 }

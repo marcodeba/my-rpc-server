@@ -55,6 +55,7 @@ public class ProcessorHandler implements Runnable {
 
     private Object invokeMethod(RpcRequest request) {
         String serviceName = request.getClassName();
+        String methodName = request.getMethodName();
         String version = request.getVersion();
         Object[] args = request.getParameters();
 
@@ -71,13 +72,13 @@ public class ProcessorHandler implements Runnable {
             Class clazz = Class.forName(request.getClassName());
             Method method;
             if (args == null) {
-                method = clazz.getMethod(request.getMethodName());
+                method = clazz.getMethod(methodName);
             } else {
                 Class<?>[] types = new Class[args.length]; //获得每个参数的类型
                 for (int i = 0; i < args.length; i++) {
                     types[i] = args[i].getClass();
                 }
-                method = clazz.getMethod(request.getMethodName(), types);
+                method = clazz.getMethod(methodName, types);
             }
 
             return method.invoke(service, args);
