@@ -54,14 +54,10 @@ public class ProcessorHandler implements Runnable {
     }
 
     private Object invokeMethod(RpcRequest request) {
-        String serviceName = request.getClassName();
         String methodName = request.getMethodName();
         String version = request.getVersion();
+        String serviceName = StringUtils.isEmpty(version) ? request.getClassName() : request.getClassName() + "-" + version;
         Object[] args = request.getParameters();
-
-        if (!StringUtils.isEmpty(version)) {
-            serviceName += "-" + version;
-        }
 
         Object service = handlerMap.get(serviceName);
         if (service == null) {

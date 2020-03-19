@@ -54,6 +54,7 @@ public class GpRpcServer implements ApplicationContextAware, InitializingBean {
             for (Object servcieBean : serviceBeanMap.values()) {
                 //拿到注解
                 RpcService rpcService = servcieBean.getClass().getAnnotation((RpcService.class));
+                if (rpcService == null) continue;
                 String serviceName = rpcService.value().getName();//拿到接口类定义
                 String version = rpcService.version(); //拿到版本号
                 if (!StringUtils.isEmpty(version)) {
