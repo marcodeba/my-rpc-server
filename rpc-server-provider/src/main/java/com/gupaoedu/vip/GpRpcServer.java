@@ -17,9 +17,10 @@ import java.util.concurrent.Executors;
 
 @Component
 public class GpRpcServer implements ApplicationContextAware, InitializingBean {
-    ExecutorService executorService = Executors.newCachedThreadPool();
+    ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
     private Map<String, Object> handlerMap = new HashMap();
     private int port;
+    private volatile boolean isStopped = false;
 
     public GpRpcServer(int port) {
         this.port = port;
@@ -30,9 +31,9 @@ public class GpRpcServer implements ApplicationContextAware, InitializingBean {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(port);
-            while (true) {
+            while (!isStopped) {
                 Socket socket = serverSocket.accept();
-                executorService.execute(new ProcessorHandler(socket, handlerMap));
+                executorService.submit(new ProcessorHandler(socket, handlerMap));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,6 +46,10 @@ public class GpRpcServer implements ApplicationContextAware, InitializingBean {
                 }
             }
         }
+    }
+
+    private void stop() {
+        this.isStopped = true;
     }
 
     @Override

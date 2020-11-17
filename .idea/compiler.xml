@@ -10,5 +10,10 @@
         <module name="rpc-server-provider" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="rpc-server" target="8" />
+      <module name="rpc-server-api" target="8" />
+      <module name="rpc-server-provider" target="8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

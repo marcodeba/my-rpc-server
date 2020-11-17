@@ -70,11 +70,11 @@ public class ProcessorHandler implements Runnable {
             if (args == null) {
                 method = clazz.getMethod(methodName);
             } else {
-                Class<?>[] types = new Class[args.length]; //获得每个参数的类型
+                Class<?>[] paramTypes = new Class[args.length];
                 for (int i = 0; i < args.length; i++) {
-                    types[i] = args[i].getClass();
+                    paramTypes[i] = args[i].getClass();
                 }
-                method = clazz.getMethod(methodName, types);
+                method = clazz.getMethod(methodName, paramTypes);
             }
 
             return method.invoke(service, args);

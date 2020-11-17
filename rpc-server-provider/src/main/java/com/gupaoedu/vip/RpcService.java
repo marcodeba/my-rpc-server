@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-
 /**
  * public interface com.gupaoedu.vip.RpcService extends java.lang.annotation.Annotation {
  *   public abstract java.lang.Class<?> value();
